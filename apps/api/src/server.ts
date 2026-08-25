@@ -7,6 +7,7 @@ import { ZodError } from "zod";
 import { config } from "./config.js";
 import { pool } from "./db.js";
 import { registerAdminRoutes } from "./routes/admin.js";
+import { registerInternalRoutes } from "./routes/internal.js";
 import { registerPublicRoutes } from "./routes/public.js";
 import { registerWebhookRoutes } from "./routes/webhooks.js";
 import { pollPendingMtnPayments } from "./services/mtn.js";
@@ -42,6 +43,20 @@ await app.register(cors, { origin: config.WEB_ORIGIN, credentials: true });
 await app.register(helmet, { contentSecurityPolicy: false });
 await app.register(rateLimit, { max: 200, timeWindow: "1 minute" });
 
+// Vercel functions do not keep process timers alive. Flush queued WhatsApp
+// replies after state-changing requests so messages are delivered before the
+// invocation ends. The database outbox still provides retries and idempotency.
+app.addHook("onSend", async (request, _reply, payload) => {
+  if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
+    try {
+      await flushOutbox();
+    } catch (error) {
+      app.log.error(error, "Unable to flush WhatsApp outbox");
+    }
+  }
+  return payload;
+});
+
 app.get("/health", async () => {
   await pool.query("SELECT 1");
   return {
@@ -56,6 +71,7 @@ app.get("/health", async () => {
 await registerPublicRoutes(app);
 await registerWebhookRoutes(app);
 await registerAdminRoutes(app);
+await registerInternalRoutes(app);
 
 app.setErrorHandler((error: unknown, _request, reply) => {
   if (error instanceof ZodError) {
@@ -69,14 +85,18 @@ app.setErrorHandler((error: unknown, _request, reply) => {
   });
 });
 
-const outboxTimer = setInterval(() => void flushOutbox().catch((error) => app.log.error(error)), 2_000);
-const mtnTimer = setInterval(() => void pollPendingMtnPayments().catch((error) => app.log.error(error)), 10_000);
-outboxTimer.unref();
-mtnTimer.unref();
+let outboxTimer: NodeJS.Timeout | undefined;
+let mtnTimer: NodeJS.Timeout | undefined;
+if (!process.env.VERCEL) {
+  outboxTimer = setInterval(() => void flushOutbox().catch((error) => app.log.error(error)), 2_000);
+  mtnTimer = setInterval(() => void pollPendingMtnPayments().catch((error) => app.log.error(error)), 10_000);
+  outboxTimer.unref();
+  mtnTimer.unref();
+}
 
 const close = async () => {
-  clearInterval(outboxTimer);
-  clearInterval(mtnTimer);
+  if (outboxTimer) clearInterval(outboxTimer);
+  if (mtnTimer) clearInterval(mtnTimer);
   await app.close();
   await pool.end();
 };

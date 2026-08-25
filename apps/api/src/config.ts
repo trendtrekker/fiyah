@@ -15,6 +15,7 @@ const schema = z.object({
   WHATSAPP_VERIFY_TOKEN: z.preprocess(emptyToUndefined, z.string().optional()),
   WHATSAPP_APP_SECRET: z.preprocess(emptyToUndefined, z.string().optional()),
   WHATSAPP_API_VERSION: z.string().default("v23.0"),
+  CRON_SECRET: z.preprocess(emptyToUndefined, z.string().min(16).optional()),
   MTN_COLLECTION_SUBSCRIPTION_KEY: z.preprocess(emptyToUndefined, z.string().optional()),
   MTN_API_USER: z.preprocess(emptyToUndefined, z.string().optional()),
   MTN_API_KEY: z.preprocess(emptyToUndefined, z.string().optional()),

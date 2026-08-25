@@ -92,6 +92,20 @@ Copy the values into `.env` when they are available:
 
 If credentials are omitted outside production, FIYAH uses local simulators. Production startup fails closed when credentials or the field-encryption key are missing.
 
+## Vercel deployment
+
+FIYAH can use two Vercel projects from this repository:
+
+- API project with **Root Directory** set to `apps/api`
+- Web project with **Root Directory** set to `apps/web`
+
+The API delivers queued WhatsApp replies before state-changing requests finish,
+because Vercel functions do not provide an always-running process. MTN callbacks
+remain the primary payment confirmation path. The protected
+`GET /internal/jobs/reconcile` endpoint provides polling and outbox recovery for
+a scheduler; set the same `CRON_SECRET` in Vercel and send it as a Bearer token.
+Do not configure a frequent Vercel cron on a Hobby plan.
+
 ## Production gates
 
 Do not collect real customer funds until all of these are complete:
