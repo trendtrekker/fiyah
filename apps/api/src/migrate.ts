@@ -4,7 +4,7 @@ import { dirname, join } from "node:path";
 import { pool } from "./db.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const migrationsDirectory = join(here, "..", "migrations");
+const migrationsDirectory = join(here, "..", "..", "..", "supabase", "migrations");
 
 async function migrate(): Promise<void> {
   const client = await pool.connect();

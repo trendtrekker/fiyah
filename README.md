@@ -45,6 +45,11 @@ npm run db:seed
 npm run dev
 ```
 
+The canonical database migrations live in `supabase/migrations/`. The same
+files are used by the local migration command and the Supabase GitHub
+integration, preventing schema drift between development and the hosted
+database.
+
 Open [http://localhost:5173](http://localhost:5173).
 
 Development administrators:
