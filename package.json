@@ -1,0 +1,26 @@
+{
+  "name": "fiyah",
+  "private": true,
+  "version": "0.1.0",
+  "description": "FIYAH WhatsApp-to-MTN MoMo remittance operations sandbox",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w @fiyah/api\" \"npm run dev -w @fiyah/web\"",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:migrate": "npm run db:migrate -w @fiyah/api",
+    "db:seed": "npm run db:seed -w @fiyah/api",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
