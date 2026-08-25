@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/admin/:path*",
+      "destination": "https://fiyah-api.vercel.app/admin/:path*"
+    },
+    {
+      "source": "/public/:path*",
+      "destination": "https://fiyah-api.vercel.app/public/:path*"
+    },
+    {
+      "source": "/sandbox/:path*",
+      "destination": "https://fiyah-api.vercel.app/sandbox/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://fiyah-api.vercel.app/health"
+    },
+    {
+      "source": "/kyc",
+      "destination": "/index.html"
+    }
+  ]
+}

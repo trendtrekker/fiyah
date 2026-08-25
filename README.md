@@ -99,6 +99,10 @@ FIYAH can use two Vercel projects from this repository:
 - API project with **Root Directory** set to `apps/api`
 - Web project with **Root Directory** set to `apps/web`
 
+The deployed web project proxies browser-facing API routes to
+`https://fiyah-api.vercel.app`, keeping administrator cookies on the web
+origin. Update `apps/web/vercel.json` if the API domain changes.
+
 The API delivers queued WhatsApp replies before state-changing requests finish,
 because Vercel functions do not provide an always-running process. MTN callbacks
 remain the primary payment confirmation path. The protected
