@@ -5,8 +5,13 @@ const { Pool } = pg;
 
 export const pool = new Pool({
   connectionString: config.DATABASE_URL,
-  max: 10,
-  idleTimeoutMillis: 30_000
+  // Supabase requires encrypted connections from Vercel. Serverless instances
+  // should also keep their pools deliberately small to avoid exhausting the
+  // transaction pooler as instances scale out.
+  ssl: process.env.VERCEL ? { rejectUnauthorized: false } : undefined,
+  max: process.env.VERCEL ? 3 : 10,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: process.env.VERCEL ? 10_000 : 5_000
 });
 
 pool.on("error", (error) => {
