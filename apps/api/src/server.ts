@@ -3,6 +3,7 @@ import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { ZodError } from "zod";
 import { config } from "./config.js";
 import { pool } from "./db.js";
@@ -103,4 +104,13 @@ const close = async () => {
 process.on("SIGINT", () => void close());
 process.on("SIGTERM", () => void close());
 
-await app.listen({ port: config.API_PORT, host: "0.0.0.0" });
+// Vercel invokes this handler for each serverless request. Starting a listener
+// inside a function invocation causes the request to hang or fail.
+export default async function handler(request: IncomingMessage, response: ServerResponse): Promise<void> {
+  await app.ready();
+  app.server.emit("request", request, response);
+}
+
+if (!process.env.VERCEL) {
+  await app.listen({ port: config.API_PORT, host: "0.0.0.0" });
+}
