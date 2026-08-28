@@ -92,6 +92,11 @@ Copy the values into `.env` when they are available:
 
 If credentials are omitted outside production, FIYAH uses local simulators. Production startup fails closed when credentials or the field-encryption key are missing.
 
+MTN's shared sandbox accepts `EUR` for Request-to-Pay, while FIYAH's actual
+Cameroon collection currency is `XAF`. `MTN_SANDBOX_COLLECTION_CURRENCY=EUR`
+therefore applies only when `MTN_TARGET_ENVIRONMENT=sandbox`; it must not be
+used as a production currency setting.
+
 ## Vercel deployment
 
 FIYAH can use two Vercel projects from this repository:

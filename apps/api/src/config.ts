@@ -20,6 +20,9 @@ const schema = z.object({
   MTN_API_USER: z.preprocess(emptyToUndefined, z.string().optional()),
   MTN_API_KEY: z.preprocess(emptyToUndefined, z.string().optional()),
   MTN_TARGET_ENVIRONMENT: z.string().default("sandbox"),
+  // MTN's shared sandbox processes collection requests in EUR. FIYAH's
+  // customer-facing amounts and production collection currency remain XAF.
+  MTN_SANDBOX_COLLECTION_CURRENCY: z.string().length(3).default("EUR"),
   MTN_BASE_URL: z.string().url().default("https://sandbox.momodeveloper.mtn.com"),
   MTN_CALLBACK_URL: z.string().url().default("http://localhost:4000/webhooks/mtn"),
   FIYAH_SERVICE_FEE_BPS: z.coerce.number().int().min(0).max(10_000).default(150),

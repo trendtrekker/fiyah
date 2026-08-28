@@ -12,6 +12,12 @@ type MtnStatus = {
 
 let cachedToken: { value: string; expiresAt: number } | undefined;
 
+function requestCurrency(): string {
+  return config.MTN_TARGET_ENVIRONMENT === "sandbox"
+    ? config.MTN_SANDBOX_COLLECTION_CURRENCY
+    : "XAF";
+}
+
 async function getAccessToken(): Promise<string> {
   if (cachedToken && cachedToken.expiresAt > Date.now() + 30_000) return cachedToken.value;
   const credentials = Buffer.from(`${config.MTN_API_USER}:${config.MTN_API_KEY}`).toString("base64");
@@ -48,7 +54,9 @@ export async function requestToPay(input: {
     },
     body: JSON.stringify({
       amount: String(input.amountXaf),
-      currency: "XAF",
+      // The shared MTN sandbox accepts EUR only. This override is deliberately
+      // restricted to sandbox requests; FIYAH production collections use XAF.
+      currency: requestCurrency(),
       externalId: input.externalId,
       payer: { partyIdType: "MSISDN", partyId: input.payerMsisdn },
       payerMessage: `FIYAH transfer ${input.externalId}`,
